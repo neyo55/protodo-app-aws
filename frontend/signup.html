@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProTodo - Sign Up</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="light-mode">
+    
+    <button id="theme-toggle" class="floating-theme-toggle" title="Toggle Theme">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <section class="auth-section">
+        <div class="auth-container">
+            <h1>ProTodo</h1>
+            <h2>Create Account</h2>
+            
+            <div id="signup-form" autocomplete="off">
+                <input type="text" id="signup-name" placeholder="Full Name" required style="margin-bottom:15px;" autocomplete="off">
+                
+                <input type="email" id="signup-email" placeholder="Email Address" required style="margin-bottom:15px;" autocomplete="off">
+                
+                <input 
+                    type="tel" 
+                    id="signup-phone" 
+                    placeholder="Phone Number" 
+                    required 
+                    style="margin-bottom:15px;" 
+                    autocomplete="off"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                >
+                
+                <div class="password-wrapper">
+                    <input type="password" id="signup-password" placeholder="Password" required autocomplete="new-password">
+                    <button type="button" class="toggle-password" onclick="togglePass('signup-password')">
+                        <i class="far fa-eye"></i>
+                    </button>
+                </div>
+
+                <div class="password-requirements">
+                    <ul>
+                        <li>At least 8 characters</li>
+                        <li>1 Uppercase (A-Z) & 1 Number (0-9)</li>
+                        <li>1 Special Character (!@#$...)</li>
+                    </ul>
+                </div>
+
+                <div class="password-wrapper">
+                    <input type="password" id="signup-confirm-password" placeholder="Confirm Password" required autocomplete="new-password">
+                    <button type="button" class="toggle-password" onclick="togglePass('signup-confirm-password')">
+                        <i class="far fa-eye"></i>
+                    </button>
+                </div>
+
+                <button id="signup-btn" class="primary-btn">Sign Up</button>
+                
+                <p style="margin-top:1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+                    Already have an account? <a href="login.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">Login</a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <footer><p>&copy; 2026 ProTodo Inc.</p></footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Inline script for password toggle only
+        function togglePass(id) {
+            const input = document.getElementById(id);
+            const btn = input.nextElementSibling.querySelector('i');
+            if (input.type === "password") {
+                input.type = "text";
+                btn.classList.remove('fa-eye');
+                btn.classList.add('fa-eye-slash');
+            } else {
+                input.type = "password";
+                btn.classList.remove('fa-eye-slash');
+                btn.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html>

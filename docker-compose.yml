@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  web:
+    image: neyo55/protodo-web:latest
+    ports:
+      - "80:5000"  # Opens Port 80 (HTTP) to the world
+    restart: always # Auto-restart if it crashes
+
+    # === NEW LOGGING CONFIGURATION ===
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"   # Max size of one log file
+        max-file: "3"     # Keep only 3 files (Total 30MB max)
+    environment:
+      # We just list the keys here. Docker will pull the ACTUAL values 
+      # from the .env file created.
+      - SECRET_KEY
+      - DATABASE_URL
+      - MAIL_SERVER
+      - MAIL_PORT
+      - MAIL_USERNAME
+      - MAIL_PASSWORD
+      - MAIL_DEFAULT_SENDER
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_BUCKET_NAME
+      - AWS_REGION
+
+  # --- MONITORING STACK ---
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    restart: always
+    # No ports exposed! We access via SSH Tunnel or Grafana only.
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"  # Exposed to the host so we can tunnel to it
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD
+      - GF_SMTP_ENABLED
+      - GF_SMTP_HOST
+      - GF_SMTP_USER
+      - GF_SMTP_PASSWORD
+      - GF_SMTP_FROM_ADDRESS
+      - GF_SMTP_FROM_NAME
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: always
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    command:
+      - '--path.rootfs=/host'
+    pid: host
+    restart: always
+    volumes:
+      - '/:/host:ro,rslave'
+
+volumes:
+  prometheus_data:
+  grafana_data:

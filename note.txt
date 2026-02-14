@@ -1,0 +1,52 @@
+kbneyo55@gmail.com
+ProTodo@2026
+
+
+The other platform I mentioned is **Cloudinary**.
+
+While you wait for the deployment, here is a quick breakdown of why I suggested them:
+
+1. **Cloudinary:**
+* **Best for:** Images and Videos.
+* **Why it's great:** It doesn't just store images; it automatically resizes, crops, and optimizes them for you. For example, if a user uploads a huge 5MB photo, Cloudinary can automatically shrink it to a tiny 50KB thumbnail for your profile picture without you writing complex code.
+* **Free Tier:** Very generous for small apps like yours.
+
+
+2. **AWS S3 (Simple Storage Service):**
+* **Best for:** Any type of file (PDFs, backups, logs, images).
+* **Why it's great:** It is the industry standard. It is incredibly cheap and reliable, but it doesn't have the "auto-editing" features of Cloudinary. It just stores files exactly as they are.
+
+
+
+**Why you will need one of these later:**
+Right now, your app saves profile pictures to the Render server's hard drive. On the **Free Tier**, Render "wipes" that hard drive every time you deploy or if the server sleeps. Moving to Cloudinary or S3 solves that problem permanently.
+
+
+
+
+docker-compose up --build
+docker-compose down 
+docker-compose logs -f web
+
+# Command to restart grafana container 
+sudo docker compose up -d grafana
+
+# View the last 100 lines and "follow" (-f) new logs as they happen
+cd todo-app
+sudo docker compose logs -f --tail=100 web
+
+# "Take port 3000 on the server and map it to port 3000 on my laptop"
+ssh -i "protodo-key.pem" -L 3000:localhost:3000 ubuntu@18.199.93.77
+
+# Command to clear unused images and build cache (I need to add this as a cronjob for it to always clear the unused images build cache)
+sudo docker system prune -a -f
+
+
+You are in the Danger Zone. Your disk is almost full. This happens because Docker images and logs accumulate quickly on small servers. If it hits 100%, the server will crash.
+
+Immediate Action: SSH into your server and run sudo docker system prune -a -f to clear unused images and build cache.
+
+
+# prometheus dashboards
+9688
+1860

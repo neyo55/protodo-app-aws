@@ -1,0 +1,190 @@
+# Docker-Compose
+
+
+
+services:
+  # Service 1: Your Flask App
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      # I construct the DB URL dynamically using the variables
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - MAIL_SERVER=${MAIL_SERVER}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_DEFAULT_SENDER=${MAIL_DEFAULT_SENDER}
+      # === AWS S3 CONFIGURATION (THIS WAS MISSING) ===
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_BUCKET_NAME=${AWS_BUCKET_NAME}
+      - AWS_REGION=${AWS_REGION}
+    depends_on:
+      - db
+
+  # Service 2: The Database
+  db:
+    image: postgres:13
+    environment:
+      # These values are pulled directly from .env
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "5435:5432" # outside world can access on 5435, but inside the network it's still 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+
+
+
+
+# ubuntu server docker-compose file using RDS
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "80:5000"  # Opens Port 80 (HTTP) to the world
+    restart: always # Auto-restart if it crashes
+    environment:
+      # We just list the keys here. Docker will pull the ACTUAL values 
+      # from the .env file created.
+      - SECRET_KEY
+      - DATABASE_URL
+      - MAIL_SERVER
+      - MAIL_PORT
+      - MAIL_USERNAME
+      - MAIL_PASSWORD
+      - MAIL_DEFAULT_SENDER
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_BUCKET_NAME
+      - AWS_REGION 
+
+
+
+# Dockerfile
+
+
+
+# 1. Base Image
+FROM python:3.9-slim
+
+# 2. Set Root Working Directory
+# We start at the root so we can copy BOTH backend and frontend folders
+WORKDIR /app
+
+# 3. Install System Dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# 4. Copy Requirements specific to backend
+# We copy this first to leverage Docker caching (speeds up re-builds)
+COPY backend/requirements.txt backend/requirements.txt
+
+# 5. Install Python Dependencies
+# We point to the file inside the backend folder
+RUN pip install --no-cache-dir -r backend/requirements.txt
+
+# 6. Copy the ENTIRE project (Backend + Frontend)
+# This results in /app/backend and /app/frontend existing inside the container
+COPY . .
+
+# 7. Change Directory to Backend
+# This is CRITICAL. It makes the app think it is running inside the 'backend' folder,
+# fixing the "ModuleNotFoundError: config" and the "frontend path" issues.
+WORKDIR /app/backend
+
+# 8. Expose Port
+EXPOSE 5000
+
+# 9. Run Command
+# Added --timeout 120 to prevent S3 uploads from timing out
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "120", "app:app"]
+
+
+
+
+# server setup 
+version: '3.8'
+
+services:
+  web:
+    image: neyo55/protodo-web:latest
+    ports:
+      - "80:5000"  # Opens Port 80 (HTTP) to the world
+    restart: always # Auto-restart if it crashes
+
+    # === NEW LOGGING CONFIGURATION ===
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"   # Max size of one log file
+        max-file: "3"     # Keep only 3 files (Total 30MB max)
+    environment:
+      # We just list the keys here. Docker will pull the ACTUAL values 
+      # from the .env file created.
+      - SECRET_KEY
+      - DATABASE_URL
+      - MAIL_SERVER
+      - MAIL_PORT
+      - MAIL_USERNAME
+      - MAIL_PASSWORD
+      - MAIL_DEFAULT_SENDER
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_BUCKET_NAME
+      - AWS_REGION
+
+  # --- MONITORING STACK ---
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    restart: always
+    # No ports exposed! We access via SSH Tunnel or Grafana only.
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"  # Exposed to the host so we can tunnel to it
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD
+      - GF_SMTP_ENABLED
+      - GF_SMTP_HOST
+      - GF_SMTP_USER
+      - GF_SMTP_PASSWORD
+      - GF_SMTP_FROM_ADDRESS
+      - GF_SMTP_FROM_NAME
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: always
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    command:
+      - '--path.rootfs=/host'
+    pid: host
+    restart: always
+    volumes:
+      - '/:/host:ro,rslave'
+
+volumes:
+  prometheus_data:
+  grafana_data:

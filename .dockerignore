@@ -1,0 +1,7 @@
+__pycache__
+*.pyc
+.git
+.env
+venv/
+.venv/
+backend/static/avatars/* # (We ignore avatars because in production they should be on S3, not in the container)
