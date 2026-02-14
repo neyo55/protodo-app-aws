@@ -1,15 +1,14 @@
-name: Production DevSecOps Pipeline
+name: Production Multi-Branch DevSecOps Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "dev", "staging", "prod" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "staging", "prod" ]
 
 jobs:
   # ------------------------------------------------------------------
-  # JOB 1: QUALITY & SECURITY GATE
-  # Run tests, linters, and security scans. If ANY fail, stop.
+  # JOB 1: QUALITY (Run on All branches)
   # ------------------------------------------------------------------
   quality-gate:
     runs-on: ubuntu-latest
@@ -25,7 +24,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 bandit safety pytest
+          pip install flake8 bandit safety pytest prometheus-flask-exporter
           if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
 
       # 1. FLAKE8 (Syntax & Style)
@@ -53,11 +52,11 @@ jobs:
         run: pytest || true 
 
   # ------------------------------------------------------------------
-  # JOB 2: BUILD & PUSH DOCKER IMAGE
-  # Only runs if 'quality-gate' passes
+  # JOB 2: BUILD (Runs on STAGING and PROD only)
   # ------------------------------------------------------------------
   build-and-push:
     needs: quality-gate
+    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -69,19 +68,28 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Set Docker Tag
+        id: tag
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/prod" ]]; then
+            echo "tag=latest" >> $GITHUB_OUTPUT
+          else
+            echo "tag=staging" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/protodo-web:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/protodo-web:${{ steps.tag.outputs.tag }}
 
   # ------------------------------------------------------------------
-  # JOB 3: DEPLOY TO PRODUCTION (EC2) VIA AWS SSM (No SSH Key needed!)
-  # Updates the live server
+  # JOB 3: DEPLOY TO PRODUCTION DEPLOY TO AWS (Runs on PROD only)
   # ------------------------------------------------------------------
   deploy:
     needs: build-and-push
+    if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -94,19 +102,19 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
 
-      - name: Deploy to Auto Scaling Group
+      - name: Deploy to AWS Auto Scaling Group
         run: |
-          # 1. Find Instance IDs tagged 'ProTodo-Worker'
+          # 1. Find Instances tagged 'ProTodo-Worker'
           INSTANCE_IDS=$(aws ec2 describe-instances \
             --filters "Name=tag:Name,Values=ProTodo-Worker" "Name=instance-state-name,Values=running" \
             --query "Reservations[].Instances[].InstanceId" --output text)
           
-          echo "Deploying to Instances: $INSTANCE_IDS"
-          
           if [ -z "$INSTANCE_IDS" ]; then
-            echo "No running instances found!"
+            echo "No running instances found! deployment skipped."
             exit 1
           fi
+
+          echo "Deploying to Production Instances: $INSTANCE_IDS"
 
           # 2. Send Command via SSM (Docker Pull & Up)
           aws ssm send-command \
@@ -119,4 +127,4 @@ jobs:
               "sudo docker compose up -d",
               "sudo docker image prune -f"
             ]' \
-            --comment "Deploying new version"
+            --comment "Deploying Prod version"
