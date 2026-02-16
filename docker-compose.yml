@@ -5,7 +5,7 @@ services:
     image: neyo55/protodo-web:latest
     container_name: protodo-web
     ports:
-      - "5000:5000"
+      - "5000:5000" # left is host, right is container
     restart: always
     env_file: .env
     logging:
