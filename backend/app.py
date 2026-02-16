@@ -161,6 +161,7 @@ def create_app():
         # FIXED: Log error instead of pass
         logging.warning(f"Scheduler failed to start (or already running): {e}")
 
+    # auto-create tables if they don't exist (safe with SQLAlchemy)
     with app.app_context():
         db.create_all()
 
