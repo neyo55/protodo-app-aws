@@ -121,7 +121,7 @@ jobs:
             --instance-ids $INSTANCE_IDS \
             --document-name "AWS-RunShellScript" \
             --parameters commands='[
-              "cd /home/ubuntu/todo-app",
+              "cd /home/ubuntu/protodo-app",
               "sudo docker compose down",
               "sudo docker pull ${{ secrets.DOCKER_USERNAME }}/protodo-web:latest",
               "sudo docker compose up -d",
