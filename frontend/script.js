@@ -559,7 +559,7 @@ function loadHeaderInfo() {
     const img = document.getElementById('header-avatar'); 
     
     // Fallback if avatar is missing
-    const avatarSrc = u.avatar ? u.avatar : `https://ui-avatars.com/api/?name=${u.name || 'User'}&background=random`;
+    const avatarSrc = (u.avatar && !u.avatar.includes('default.png')) ? u.avatar : `https://ui-avatars.com/api/?name=${u.name || 'User'}&background=random`;
     img.src = avatarSrc; 
     
     document.getElementById('user-header').classList.remove('hidden'); 
@@ -573,7 +573,8 @@ function loadProfileData() {
     document.getElementById('profile-phone').value = u.phone || ''; 
     
     // Fallback if avatar is missing
-    const avatarSrc = u.avatar ? u.avatar : `https://ui-avatars.com/api/?name=${u.name || 'User'}&background=random`;
+    const avatarSrc = (u.avatar && !u.avatar.includes('default.png')) ? u.avatar : `https://ui-avatars.com/api/?name=${u.name || 'User'}&background=random`;
+    // const avatarSrc = u.avatar ? u.avatar : `https://ui-avatars.com/api/?name=${u.name || 'User'}&background=random`;
     document.getElementById('profile-preview').src = avatarSrc; 
 }
 
