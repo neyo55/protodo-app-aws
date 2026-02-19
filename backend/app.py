@@ -1,5 +1,5 @@
 # backend/app.py
-# ProTodo v2.3 - Security Hardening & Fixes
+# ProTodo v1.4 - Security Hardening & Fixes
 
 import os
 import logging # <--- ADDED for logging errors
@@ -51,11 +51,38 @@ def create_app():
     def serve_avatars(filename):
         return send_from_directory(os.path.join(BACKEND_STATIC, 'avatars'), filename)
 
-    # === ROUTE 2: SERVE FRONTEND ===
+    # # === ROUTE 2: SERVE FRONTEND ===
+    # @app.route('/')
+    # def serve_index():
+    #     return send_from_directory(FRONTEND_FOLDER, 'app.html')
+
+    # @app.route('/<path:filename>')
+    # def serve_static(filename):
+    #     return send_from_directory(FRONTEND_FOLDER, filename)
+
+    # === ROUTE 2: CLEAN URL FRONTEND ROUTING ===
     @app.route('/')
-    def serve_index():
+    @app.route('/app')
+    def serve_app():
         return send_from_directory(FRONTEND_FOLDER, 'app.html')
 
+    @app.route('/login')
+    def serve_login():
+        return send_from_directory(FRONTEND_FOLDER, 'login.html')
+
+    @app.route('/signup')
+    def serve_signup():
+        return send_from_directory(FRONTEND_FOLDER, 'signup.html')
+
+    @app.route('/forgot-password')
+    def serve_forgot():
+        return send_from_directory(FRONTEND_FOLDER, 'forgot-password.html')
+
+    @app.route('/reset-password')
+    def serve_reset():
+        return send_from_directory(FRONTEND_FOLDER, 'reset-password.html')
+
+    # Catch-all for CSS, JS, and actual static assets
     @app.route('/<path:filename>')
     def serve_static(filename):
         return send_from_directory(FRONTEND_FOLDER, filename)

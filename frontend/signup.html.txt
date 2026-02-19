@@ -58,7 +58,7 @@
                 <button id="signup-btn" class="primary-btn">Sign Up</button>
                 
                 <p style="margin-top:1.5rem; font-size: 0.9rem; color: var(--text-muted);">
-                    Already have an account? <a href="/login" style="color: var(--primary); text-decoration: none; font-weight: 600;">Login</a>
+                    Already have an account? <a href="login.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">Login</a>
                 </p>
             </div>
         </div>

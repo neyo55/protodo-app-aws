@@ -23,13 +23,13 @@
             <input type="password" id="login-password" placeholder="Password" required>
 
             <div style="text-align: right; margin-bottom: 15px;">
-                <a href="/forgot-password" style="color: var(--primary); font-size: 0.85rem; text-decoration: none;">Forgot Password?</a>
+                <a href="forgot-password.html" style="color: var(--primary); font-size: 0.85rem; text-decoration: none;">Forgot Password?</a>
             </div>
             
             <button id="login-btn" class="primary-btn">Login</button>
             
             <p style="margin-top:1.5rem; font-size: 0.9rem; color: var(--text-muted);">
-                Don't have an account? <a href="/signup" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign Up</a>
+                Don't have an account? <a href="signup.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign Up</a>
             </p>
         </div>
     </section>
@@ -39,3 +39,5 @@
     <script src="script.js"></script>
 </body>
 </html>
+
+

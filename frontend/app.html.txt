@@ -23,7 +23,7 @@
             </div>
             
             <div class="user-welcome hidden" id="user-header">
-                <img src="" id="header-avatar" class="avatar-img" alt="User Avatar">
+                <img src="https://via.placeholder.com/40" id="header-avatar" class="avatar-img">
                 <span id="header-nickname">User</span>
             </div>
 
@@ -162,7 +162,7 @@
             <h2 style="margin-bottom: 25px; text-align:center;">Account Settings</h2>
             
             <div class="avatar-upload-section">
-                <img src="" id="profile-preview" class="avatar-large" alt="Profile Preview">
+                <img src="https://via.placeholder.com/120" id="profile-preview" class="avatar-large">
                 <label for="profile-avatar-input" class="upload-btn-label">
                     <i class="fas fa-camera"></i> Change Photo
                 </label>

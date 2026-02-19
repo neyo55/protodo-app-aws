@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadTodos();      
             loadHeaderInfo(); 
         } else { 
-            if(!document.getElementById('login-email')) window.location.href = '/login'; 
+            if(!document.getElementById('login-email')) window.location.href = 'login.html'; 
         }
     }
 });
@@ -278,7 +278,7 @@ function isStrongPassword(password) {
 async function authenticatedFetch(url, options = {}) {
     const token = localStorage.getItem('token');
     if (!token) { 
-        if(!document.getElementById('login-email')) window.location.href = '/login'; 
+        if(!document.getElementById('login-email')) window.location.href = 'login.html'; 
         return null; 
     }
     if (!options.headers) options.headers = {};
@@ -502,7 +502,7 @@ async function handleLogin() {
     const p = document.getElementById('login-password').value;
     const res = await fetch(`${API_BASE}/login`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email:e, password:p})});
     const data = await res.json();
-    if(res.ok) { localStorage.setItem('token', data.token); localStorage.setItem('user', JSON.stringify(data.user)); window.location.href = '/app'; }
+    if(res.ok) { localStorage.setItem('token', data.token); localStorage.setItem('user', JSON.stringify(data.user)); window.location.href = 'app.html'; }
     else { showToast(data.message, 'error'); setLoading('login-btn', false, 'Login'); }
 }
 
@@ -526,7 +526,7 @@ async function handleForgot() {
     if(!email) return showToast("Enter email", "error");
     setLoading('send-code-btn', true, "Sending...");
     const res = await fetch(`${API_BASE}/forgot-password`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email})});
-    if(res.ok) { localStorage.setItem('reset_email', email); window.location.href = '/reset-password'; }
+    if(res.ok) { localStorage.setItem('reset_email', email); window.location.href = 'reset-password.html'; }
     else showToast("Error sending code", "error");
     setLoading('send-code-btn', false, "Send Code");
 }
@@ -539,13 +539,13 @@ async function handleReset() {
     if(!isStrongPassword(pass)) return showToast("Password weak", "error");
     setLoading('reset-btn', true, "Updating...");
     const res = await fetch(`${API_BASE}/reset-password`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:localStorage.getItem('reset_email'), code, new_password:pass})});
-    if(res.ok) { showToast("Success!", "success"); window.location.href = '/login'; }
+    if(res.ok) { showToast("Success!", "success"); window.location.href = 'login.html'; }
     else showToast("Failed", "error");
     setLoading('reset-btn', false, "Set New Password");
 }
 
 // === UTILS ===
-function logout() { localStorage.clear(); window.location.href = '/login'; }
+function logout() { localStorage.clear(); window.location.href = 'login.html'; }
 function setLoading(btnId, isLoading, defaultText) { const btn = document.getElementById(btnId); if (!btn) return; if (isLoading) { btn.disabled = true; btn.innerHTML = `<span class="spinner"></span>...`; } else { btn.disabled = false; btn.innerHTML = defaultText; } }
 function updateBulkUI() { const c = document.querySelectorAll('.bulk-check:checked').length; document.getElementById('selected-count').innerText = c; document.getElementById('bulk-bar').classList.toggle('hidden', c===0); }
 function initTheme() { if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode'); }
