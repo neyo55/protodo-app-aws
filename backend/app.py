@@ -9,6 +9,7 @@ from prometheus_flask_exporter import PrometheusMetrics
 from flask_jwt_extended import JWTManager
 from flask_apscheduler import APScheduler
 from datetime import datetime, timezone, timedelta
+from flask_talisman import Talisman
 try:
     from zoneinfo import ZoneInfo
 except ImportError:
@@ -20,9 +21,21 @@ from auth import auth_bp
 from todos import todos_bp 
 from mailer import send_reminder_email
 
+
+
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    # 1. HTTP Security Headers
+    # (We disable strict CSP temporarily so your UI Avatars and FontAwesome load correctly)
+    Talisman(app, content_security_policy=None, force_https=False) # ALB handles HTTPS
+
+    # 2. Cookie Hardening (Secures default Flask session cookies)
+    app.config['SESSION_COOKIE_SECURE'] = True    # Only send cookies over HTTPS
+    app.config['SESSION_COOKIE_HTTPONLY'] = True  # Block JavaScript from reading cookies
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax' # Block cross-site tracking
 
     # Enable CORS
     CORS(app, origins=["*"], supports_credentials=True)

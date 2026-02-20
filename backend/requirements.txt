@@ -36,3 +36,4 @@ Werkzeug
 email-validator
 boto3
 prometheus-flask-exporter
+flask-talisman
