@@ -52,7 +52,7 @@ jobs:
         run: pytest || true 
 
   # ------------------------------------------------------------------
-  # JOB 2: BUILD (Runs on STAGING and PROD only)
+  # JOB 2: BUILD & SCAN (Runs on STAGING and PROD only)
   # ------------------------------------------------------------------
   build-and-push:
     needs: quality-gate
@@ -77,12 +77,29 @@ jobs:
             echo "tag=staging" >> $GITHUB_OUTPUT
           fi
 
-      - name: Build and Push Docker Image
+      # 1. BUILD LOCALLY (DO NOT PUSH YET)
+      - name: Build Docker Image (Local Load)
         uses: docker/build-push-action@v4
         with:
           context: .
-          push: true
+          load: true # <--- This keeps the image local for scanning
           tags: ${{ secrets.DOCKER_USERNAME }}/protodo-web:${{ steps.tag.outputs.tag }}
+
+      # 2. SCAN THE LOCAL IMAGE
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ secrets.DOCKER_USERNAME }}/protodo-web:${{ steps.tag.outputs.tag }}'
+          format: 'table'
+          exit-code: '1' # Fails the pipeline instantly if a CRITICAL vuln is found
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      # 3. PUSH ONLY IF THE SCAN PASSED
+      - name: Push Secure Image to Docker Hub
+        # This step only runs if Trivy exits with a success code (0)
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/protodo-web:${{ steps.tag.outputs.tag }}
 
   # ------------------------------------------------------------------
   # JOB 3: DEPLOY TO PRODUCTION DEPLOY TO AWS (Runs on PROD only)
