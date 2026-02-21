@@ -15,9 +15,15 @@ RUN apt-get update && apt-get install -y \
 # We copy this first to leverage Docker caching (speeds up re-builds)
 COPY backend/requirements.txt backend/requirements.txt
 
-# 5. Install Python Dependencies
-# We point to the file inside the backend folder
-RUN pip install --no-cache-dir -r backend/requirements.txt
+# 5. Install Python Dependencies & Security Patches
+# We upgrade pip and wheel first to patch base-image vulnerabilities, 
+# then we install the requirements.
+RUN pip install --no-cache-dir --upgrade pip "wheel>=0.46.2" && \
+    pip install --no-cache-dir -r backend/requirements.txt
+
+# # 5. Install Python Dependencies
+# # We point to the file inside the backend folder
+# RUN pip install --no-cache-dir -r backend/requirements.txt
 
 # 6. Copy the ENTIRE project (Backend + Frontend)
 # This results in /app/backend and /app/frontend existing inside the container
