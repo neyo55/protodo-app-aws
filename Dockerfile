@@ -18,7 +18,7 @@ COPY backend/requirements.txt backend/requirements.txt
 # 5. Install Python Dependencies & Security Patches
 # We upgrade pip and wheel first to patch base-image vulnerabilities, 
 # then we install the requirements.
-RUN pip install --no-cache-dir --upgrade pip "wheel>=0.46.2" && \
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -r backend/requirements.txt
 
 # # 5. Install Python Dependencies
