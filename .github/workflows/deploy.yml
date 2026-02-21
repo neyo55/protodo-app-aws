@@ -82,7 +82,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          load: true # <--- This keeps the image local for scanning
+          load: true # This keeps the image local for scanning
           tags: ${{ secrets.DOCKER_USERNAME }}/protodo-web:${{ steps.tag.outputs.tag }}
 
       # 2. SCAN THE LOCAL IMAGE
@@ -91,7 +91,7 @@ jobs:
         with:
           image-ref: '${{ secrets.DOCKER_USERNAME }}/protodo-web:${{ steps.tag.outputs.tag }}'
           format: 'table'
-          exit-code: '1' # Fails the pipeline instantly if a CRITICAL vuln is found
+          exit-code: '1' # Fails the pipeline instantly if CRITICAL vulnerabilities are found
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
