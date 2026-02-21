@@ -31,9 +31,15 @@ SQLAlchemy
 typing_extensions
 tzdata
 tzlocal
-urllib3
+urllib3>=2.6.3
 Werkzeug
 email-validator
 boto3
 prometheus-flask-exporter
 flask-talisman
+
+
+
+# --- SECURITY PATCHES (TRIVY) ---
+jaraco.context>=6.1.0
+wheel>=0.46.2
