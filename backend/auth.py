@@ -5,10 +5,10 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 from werkzeug.utils import secure_filename
 from models import db, User
 from mailer import send_reset_code
-import secrets # <--- CHANGED: Use secrets instead of random
-import string
+import secrets 
 import os
 import re 
+import logging
 from datetime import datetime, timedelta, timezone
 import boto3 
 from botocore.exceptions import NoCredentialsError 
@@ -135,8 +135,12 @@ def update_profile():
                 user.avatar = f"https://{s3_bucket}.s3.{s3_region}.amazonaws.com/{s3_key}"
 
             except Exception as e:
-                print(f"S3 Upload Error: {e}")
+                logging.error(f"S3 Upload Error: {e}")
                 return jsonify({"message": "Failed to upload image to cloud"}), 500
+
+            # except Exception as e:
+            #     print(f"S3 Upload Error: {e}")
+            #     return jsonify({"message": "Failed to upload image to cloud"}), 500
 
     db.session.commit()
     return jsonify({"message": "Profile updated", "avatar": user.avatar})

@@ -102,7 +102,7 @@ jobs:
         run: docker push ${{ secrets.DOCKER_USERNAME }}/protodo-web:${{ steps.tag.outputs.tag }}
 
   # ------------------------------------------------------------------
-  # JOB 3: DEPLOY TO PRODUCTION DEPLOY TO AWS (Runs on PROD only)
+  # JOB 3: DEPLOY TO PRODUCTION ON AWS (Runs on PROD only)
   # ------------------------------------------------------------------
   deploy:
     needs: build-and-push
