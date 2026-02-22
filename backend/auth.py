@@ -8,6 +8,7 @@ from mailer import send_reset_code
 import secrets 
 import os
 import re 
+import string
 import logging
 from datetime import datetime, timedelta, timezone
 import boto3 
@@ -137,10 +138,6 @@ def update_profile():
             except Exception as e:
                 logging.error(f"S3 Upload Error: {e}")
                 return jsonify({"message": "Failed to upload image to cloud"}), 500
-
-            # except Exception as e:
-            #     print(f"S3 Upload Error: {e}")
-            #     return jsonify({"message": "Failed to upload image to cloud"}), 500
 
     db.session.commit()
     return jsonify({"message": "Profile updated", "avatar": user.avatar})
