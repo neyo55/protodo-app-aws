@@ -64,15 +64,6 @@ def create_app():
     def serve_avatars(filename):
         return send_from_directory(os.path.join(BACKEND_STATIC, 'avatars'), filename)
 
-    # # === ROUTE 2: SERVE FRONTEND ===
-    # @app.route('/')
-    # def serve_index():
-    #     return send_from_directory(FRONTEND_FOLDER, 'app.html')
-
-    # @app.route('/<path:filename>')
-    # def serve_static(filename):
-    #     return send_from_directory(FRONTEND_FOLDER, filename)
-
     # === ROUTE 2: CLEAN URL FRONTEND ROUTING ===
     @app.route('/')
     @app.route('/app')
