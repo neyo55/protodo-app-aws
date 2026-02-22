@@ -34,7 +34,6 @@ tzlocal
 urllib3>=2.6.3
 Werkzeug
 email-validator
-boto3>=1.34.0
-botocore>=1.34.0
+boto3
 prometheus-flask-exporter
 flask-talisman
