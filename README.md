@@ -1,7 +1,6 @@
 
 ---
 
-```markdown
 # 🚀 ProTodo: Highly Available AWS Cloud Architecture & DevSecOps Pipeline
 
 ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
@@ -243,7 +242,5 @@ Instead of fighting the AWS security defaults manually in the console, the entir
 1. **Bucket Ownership Controls:** Explicitly configured `aws_s3_bucket_ownership_controls` to `BucketOwnerPreferred` to re-enable ACL processing.
 2. **Public Access Block:** Overrode the default lockdown by setting `block_public_acls = false` inside the `aws_s3_bucket_public_access_block` resource.
 3. **Least-Privilege IAM:** Stripped the dangerous `AmazonS3FullAccess` policy from the EC2 instance and replaced it with a highly scoped inline IAM policy that only allows `PutObject`, `PutObjectAcl`, and `GetObject` strictly within the `protodo-prod-storage` bucket ARN.
-
-```
 
 ```
