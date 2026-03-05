@@ -11,8 +11,8 @@ This project demonstrates modern Cloud Engineering best practices, utilizing **T
 
 ## Architecture Overview
 
+```mermaid
 flowchart TB
-    %% External Entities
     User((🧑‍💻 User))
     Cloudflare["☁️ Cloudflare DNS"]
     Admin((👨‍🔧 DevOps / You))
@@ -20,7 +20,6 @@ flowchart TB
     subgraph AWS["AWS Cloud (Region: eu-central-1)"]
         direction TB
         
-        %% Global / Regional AWS Services
         S3["🪣 Amazon S3 (Avatars)"]
         SSM["🔐 SSM Parameter Store (Secrets)"]
         CW["📊 Amazon CloudWatch (Metrics)"]
@@ -41,14 +40,12 @@ flowchart TB
                 RDS[("🐘 Amazon RDS (PostgreSQL)")]
             end
 
-            %% Internal VPC Traffic
             ALB -->|Port 5000| EC2_1
             ALB -->|Port 5000| EC2_2
             EC2_1 -->|Port 5432| RDS
             EC2_2 -->|Port 5432| RDS
         end
 
-        %% Connections to AWS Services
         EC2_1 -->|Uploads via IMDSv2| S3
         EC2_2 -->|Uploads via IMDSv2| S3
         
@@ -64,12 +61,13 @@ flowchart TB
         Budgets -.->|Threshold Reached| SNS
     end
 
-    %% External Traffic Flow
     User -->|HTTPS| Cloudflare
     Cloudflare -->|HTTPS| ALB
     SNS -->|Sends Email| Admin
 
-*(Insert your architecture diagram or Lucidchart screenshot here)*
+```
+
+*(Insert your architecture diagram or Lucidchart screenshot here if you prefer an image)*
 
 ### The Application (ProTodo)
 
@@ -184,28 +182,6 @@ A production app isn't complete without monitoring and financial guardrails.
 
 ---
 
-## Lessons Learned & Technical Highlights
-
-* **IMDSv2 and Docker Routing:** Securing EC2 metadata with `http_tokens = "required"` initially broke the `boto3` S3 upload functionality. Solved by increasing the `http_put_response_hop_limit = 3` in the Launch Template, allowing Docker containers to successfully traverse the network bridge to retrieve AWS credentials safely.
-* **Logging vs. Printing:** Transitioned from basic `print()` statements to Python's built-in `logging` module to ensure container stdout/stderr was properly captured by Docker's `json-file` driver and viewable via `docker logs`.
-* **Idempotent Bootstrapping:** The `script.sh` is designed to be fully idempotent, safely tearing down old conflicting Docker packages before installing the official Docker CE, ensuring server replacements boot perfectly every time.
-
----
-
-### Congratulations!
-
-This wraps up an incredible project. You should post this to LinkedIn with a summary of the hardest bug you fixed (like the IMDSv2 Docker Hop Limit or the S3 Block Public Access issue)—recruiters love seeing how engineers solve deep technical problems.
-
-Is there anything else you want to tweak in this README, or are you ready to officially call this project complete?
-
-This is an excellent idea. When hiring managers or senior engineers read portfolio projects, they actually skim past the "happy path" features and go straight to the roadblocks. They want to see how you troubleshoot, how deeply you understand the underlying systems, and how you articulate complex bugs.
-
-Here is a dedicated **"Roadblocks & Technical Deep Dives"** section you can copy and paste directly into your README (I recommend placing it right after the "Codebase Structure" section).
-
-It is written to sound highly professional, showcasing your deep understanding of AWS networking, IAM, and Docker internals.
-
----
-
 ## Roadblocks & Technical Deep Dives
 
 Building a production-ready environment is rarely straightforward. Here are two major technical challenges encountered during this deployment and how they were engineered away:
@@ -237,8 +213,11 @@ Instead of fighting the AWS security defaults manually in the console, the entir
 
 ---
 
-### How to use this:
+## Lessons Learned & Technical Highlights
 
-You can drop this directly into your README. It perfectly captures the pain of the debugging process but highlights your advanced knowledge of packet TTLs, Docker bridging, and S3 security hierarchies.
+* **Logging vs. Printing:** Transitioned from basic `print()` statements to Python's built-in `logging` module to ensure container stdout/stderr was properly captured by Docker's `json-file` driver and viewable via `docker logs`.
+* **Idempotent Bootstrapping:** The `script.sh` is designed to be fully idempotent, safely tearing down old conflicting Docker packages before installing the official Docker CE, ensuring server replacements boot perfectly every time.
 
-Are you ready to commit this masterpiece to GitHub, or is there any final detail you'd like to polish?
+```
+
+```
