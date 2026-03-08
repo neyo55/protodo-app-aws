@@ -1,3 +1,5 @@
+# requirements.txt
+
 APScheduler
 bcrypt
 blinker
