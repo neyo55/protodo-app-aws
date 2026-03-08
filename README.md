@@ -3,8 +3,6 @@
 
 # ProTodo: Highly Available AWS Cloud Architecture & DevSecOps Pipeline
 
-
-```markdown
 ![Python](https://img.shields.io/badge/Python-3.10-blue)
 ![Flask](https://img.shields.io/badge/Flask-Backend-black)
 ![Docker](https://img.shields.io/badge/Docker-Containerized-blue)
@@ -14,7 +12,7 @@
 ![DevSecOps](https://img.shields.io/badge/DevSecOps-Enabled-purple)
 ![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?style=for-the-badge&logo=terraform&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
-```
+
 ---
 
 **ProTodo** is a production-grade, containerized Task Management application deployed on a highly available, self-healing AWS infrastructure. ([ProTodo-Infrastructure](https://github.com/neyo55/protodo-infrastructure-aws.git))
@@ -38,46 +36,62 @@ ProTodo is a full-stack web application built to manage daily tasks securely.
 
 # Architecture Overview
 
+The following diagram illustrates the flow of traffic, data, and automated monitoring across the AWS environment.
+
 ```mermaid
-flowchart TD
+flowchart TB
+    User((🧑‍💻 User))
+    Cloudflare["☁️ Cloudflare DNS"]
+    Admin((👨‍🔧 DevOps / You))
 
-User[Users / Browser]
+    subgraph AWS["AWS Cloud (Region: eu-central-1)"]
+        direction TB
+        
+        S3["🪣 Amazon S3 (Avatars)"]
+        SSM["🔐 SSM Parameter Store (.env Secrets)"]
+        CW["📊 Amazon CloudWatch (Metrics)"]
+        SNS["✉️ Amazon SNS (Alerts)"]
+        Budgets["💰 AWS Budgets ($20 Limit)"]
 
-User --> CF[CloudFront CDN]
+        subgraph VPC["🌐 Custom VPC (10.0.0.0/16)"]
+            direction TB
+            ALB["⚖️ Application Load Balancer (HTTPS)"]
 
-CF --> ALB[Application Load Balancer]
+            subgraph ASG["⚙️ Auto Scaling Group (Public Subnets)"]
+                direction LR
+                EC2_1["🖥️ EC2 (Docker: Flask App)"]
+                EC2_2["🖥️ EC2 (Docker: Flask App)"]
+            end
 
-ALB --> ASG[Auto Scaling Group]
+            subgraph DB_Subnet["🗄️ DB Subnet Group"]
+                RDS[("🐘 Amazon RDS (PostgreSQL)")]
+            end
 
-ASG --> EC2[EC2 Instance]
+            ALB -->|Port 5000| EC2_1
+            ALB -->|Port 5000| EC2_2
+            EC2_1 -->|Port 5432| RDS
+            EC2_2 -->|Port 5432| RDS
+        end
 
-EC2 --> Docker[Docker Container - ProTodo App]
+        EC2_1 -->|Uploads via IMDSv2| S3
+        EC2_2 -->|Uploads via IMDSv2| S3
+        
+        EC2_1 -.->|Decrypts at Boot| SSM
+        EC2_2 -.->|Decrypts at Boot| SSM
 
-Docker --> Flask[Flask Backend API]
+        EC2_1 -.->|RAM/Disk Data| CW
+        EC2_2 -.->|RAM/Disk Data| CW
+        RDS -.->|CPU/Storage Data| CW
+        ASG -.->|Scaling Events| SNS
 
-Flask --> RDS[(PostgreSQL / MySQL Database)]
+        CW -->|Triggers Alarms| SNS
+        Budgets -.->|Threshold Reached| SNS
+    end
 
-Flask --> S3[(AWS S3 - Avatar Storage)]
+    User -->|HTTPS| Cloudflare
+    Cloudflare -->|HTTPS| ALB
+    SNS -->|Sends Email| Admin
 
-Flask --> SES[(Email Service - Password Reset)]
-
-EC2 --> Prometheus[Prometheus Monitoring]
-
-Prometheus --> Grafana[Grafana Dashboard]
-
-GitHub[GitHub Repository]
-
-GitHub --> Actions[GitHub Actions CI/CD]
-
-Actions --> Security[Security Scans]
-
-Security --> DockerBuild[Docker Image Build]
-
-DockerBuild --> DockerHub[Docker Hub]
-
-DockerHub --> Deploy[AWS Deployment via SSM]
-
-Deploy --> EC2
 ```
 ---
 
